@@ -1,5 +1,7 @@
 # botyarachess ♞
 
+![License](https://img.shields.io/github/license/dimasbotyara/botyarachess)
+
 Полноценное шахматное веб-приложение на Flask + python-chess, которое
 работает **полностью офлайн** (в локальной сети, без единого CDN) и умеет
 играть с **настоящим LLM-соперником, который общается с тобой**.

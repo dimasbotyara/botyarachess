@@ -1,6 +1,8 @@
 # Third-party assets and licenses
 
-Everything below is bundled locally so the app runs without internet access.
+The botyarachess project itself is licensed under the **MIT License**
+(see [LICENSE](LICENSE)). Everything below is bundled locally so the app runs
+without internet access.
 
 ## Fonts (static/fonts/)
 

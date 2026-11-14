@@ -65,6 +65,9 @@ function showPly(n) {
   } else {
     board.setHighlights({});
   }
+  // ply indicator between the arrows
+  const plyNode = document.getElementById('nav-ply');
+  if (plyNode) plyNode.textContent = `${currentPly} / ${plies.length}`;
   document.querySelectorAll('.review-moves .move').forEach((node) => {
     node.classList.toggle('current', Number(node.dataset.ply) === currentPly);
   });

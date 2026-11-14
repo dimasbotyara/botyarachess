@@ -300,9 +300,6 @@
 .accuracy-bar { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
 .accuracy-bar div { height: 100%; background: var(--success); }
 
-.review-nav { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
-.review-nav .btn { padding: 8px 10px; }
-
 .engine-badge { display: inline-flex; align-items: center; gap: 6px; }
 .engine-badge .icon { width: 15px; height: 15px; }
 
@@ -418,3 +415,27 @@
 .game-nav { display: none; gap: 6px; justify-content: center; margin-top: 10px; }
 .game-nav.visible { display: flex; }
 .game-nav .btn { padding: 8px 10px; }
+
+.review-nav {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+.review-nav .nav-btn { padding: 10px 16px; }
+.review-nav .nav-btn .icon { width: 20px; height: 20px; }
+.nav-ply {
+  min-width: 64px;
+  text-align: center;
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 6px 10px;
+  border-radius: 9px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+}
+
+/* review board: slightly smaller so the nav row fits the first screen */
+.review-layout .board-wrap { max-width: min(520px, 100%); }

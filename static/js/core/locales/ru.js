@@ -337,3 +337,7 @@ Object.assign(ru, {
   'review.class.mistake_desc': 'Заметный промах, существенно ухудшающий позицию или отдающий инициативу.',
   'review.class.blunder_desc': 'Грубая ошибка, которая коренным образом может изменить исход партии.',
 });
+Object.assign(ru, {
+  'review.first': 'Первый ход (Home)', 'review.prev': 'Предыдущий ход (←)',
+  'review.next': 'Следующий ход (→)', 'review.last': 'Последний ход (End)',
+});

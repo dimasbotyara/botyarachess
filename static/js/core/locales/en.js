@@ -337,3 +337,7 @@ Object.assign(en, {
   'review.class.mistake_desc': 'A clear mistake that significantly worsens the position or gives away the initiative.',
   'review.class.blunder_desc': 'A serious error that can dramatically change the outcome of the game.',
 });
+Object.assign(en, {
+  'review.first': 'First move (Home)', 'review.prev': 'Previous move (←)',
+  'review.next': 'Next move (→)', 'review.last': 'Last move (End)',
+});
