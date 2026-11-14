@@ -320,3 +320,20 @@ Object.assign(en, {
   'theme.solarized-dark': 'Solarized Dark', 'theme.solarized-light': 'Solarized Light',
   'theme.everforest-dark': 'Everforest Dark', 'theme.everforest-light': 'Everforest Light',
 });
+Object.assign(en, {
+  'settings.persona.none': 'Default AI (no persona)',
+  'review.class.book': 'Book',
+  'review.class.brilliant': 'Brilliant',
+  'review.class.great': 'Great',
+  'review.class.miss': 'Miss',
+  'review.class.book_desc': 'A move from established opening theory — not judged good or bad by the engine.',
+  'review.class.brilliant_desc': 'A very strong move, usually involving a good or unexpected sacrifice in a critical position.',
+  'review.class.great_desc': 'A key turning point — often the only move that keeps the initiative, the win, or the position.',
+  'review.class.best_desc': 'The strongest move according to the chess engine.',
+  'review.class.excellent_desc': 'Only slightly worse than the best move — still a very high-quality move.',
+  'review.class.good_desc': 'A solid, reasonable move that does not damage the position.',
+  'review.class.miss_desc': 'A chance to win material or gain a decisive advantage was missed.',
+  'review.class.inaccuracy_desc': 'A minor strategic or tactical slip that slightly worsens the position.',
+  'review.class.mistake_desc': 'A clear mistake that significantly worsens the position or gives away the initiative.',
+  'review.class.blunder_desc': 'A serious error that can dramatically change the outcome of the game.',
+});

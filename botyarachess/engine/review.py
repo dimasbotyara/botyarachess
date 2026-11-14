@@ -7,6 +7,10 @@ Detection order (per requirement):
 
 Stockfish speaks UCI; GNU Chess natively speaks the XBoard/CECP protocol,
 so both protocols are attempted during the handshake.
+
+Move classification follows the chess.com-style taxonomy:
+book / brilliant / great / best / excellent / good / miss /
+inaccuracy / mistake / blunder.
 """
 from __future__ import annotations
 
@@ -26,6 +30,68 @@ SPEEDS = {"fast": 0.15, "normal": 0.4, "deep": 1.2}
 _JOBS: dict[str, dict] = {}
 _LOCK = threading.Lock()
 _JOB_SEQ = 0
+
+MATE_SCORE_CP = 10000
+
+
+# ---------------------------------------------------------------- opening book
+# Small embedded theory book (SAN sequences of popular openings). A move is
+# "book" while the played sequence matches one of these lines exactly.
+BOOK_LINES = [
+    # open games
+    "e4 e5 Nf3 Nc6 Bc4 Bc5 c3 Nf6 d3 d6",
+    "e4 e5 Nf3 Nc6 Bc4 Nf6 d3 Bc5 c3 O-O",
+    "e4 e5 Nf3 Nc6 Bc4 Nf6 Ng5 d5 exd5 Na5",
+    "e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3",
+    "e4 e5 Nf3 Nc6 Bb5 Nf6 O-O Nxe4 d4 Nd6 Bxc6 dxc6 dxe5 Nf5",
+    "e4 e5 Nf3 Nc6 Nc3 Nf6 Bb5 Bb4 O-O O-O d3 d6",
+    "e4 e5 Nf3 Nc6 d4 exd4 Nxd4 Nf6 Nxc6 bxc6 e5 Qe7",
+    "e4 e5 Nf3 Nf6 Nxe5 d6 Nf3 Nxe4 d4 d5 Bd3 Be7",
+    "e4 e5 f4 exf4 Nf3 g5 h4 g4 Ng5 h6",
+    "e4 e5 Nc3 Nf6 f4 d5 fxe5 Nxe4 Nf3 Be7",
+    "e4 e5 Bc4 Nf6 d3 c6 Nf3 d5 exd5 cxd5",
+    # sicilian
+    "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 Be3 e6 f3 b5 g4 h6",
+    "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 f3 e5 Bb5+",
+    "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 g6 Be3 Bg7 f3 O-O Qd2 Nc6",
+    "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 Nc6 Be2 e5 Nb3 Be7",
+    "e4 c5 Nf3 e6 d4 cxd4 Nxd4 Nc6 Nc3 Qc7",
+    "e4 c5 c3 Nf6 e5 Nd5 d4 cxd4 Nf3 e6",
+    "e4 c5 Nc3 Nc6 g3 g6 Bg2 Bg7 d3 d6 Be3 Rb8",
+    # french / caro / scandinavian / pirc
+    "e4 e6 d4 d5 e5 c5 c3 Nc6 Nf3 Qb6 a3",
+    "e4 e6 d4 d5 Nc3 Bb4 e5 c5 a3 Bxc3+ bxc3 Ne7",
+    "e4 e6 d4 d5 Nc3 Nf6 e5 Nfd7 f4 c5 Nf3 Nc6 Be3",
+    "e4 c6 d4 d5 e5 Bf5 Nf3 e6 Be2 c5",
+    "e4 c6 d4 d5 Nc3 dxe4 Nxe4 Bf5 Ng3 Bg6 h4 h6 Nf3 Nd7",
+    "e4 c6 d4 d5 exd5 cxd5 Bd3 Nc6 c3 Nf6 Bf4",
+    "e4 d5 exd5 Qxd5 Nc3 Qa5 d4 Nf6 Nf3 c6 Bc4 Bf5",
+    "e4 d6 d4 Nf6 Nc3 g6 Nf3 Bg7 Be2 O-O O-O c6",
+    "e4 Nf6 e5 Nd5 d4 d6 c4 Nb6 exd6 exd6",
+    # d4 openings
+    "d4 d5 c4 e6 Nc3 Nf6 Bg5 Be7 e3 O-O Nf3 h6 Bh4",
+    "d4 d5 c4 e6 Nc3 Nf6 cxd5 exd5 Bg5 c6 e3 Be7 Bd3 O-O",
+    "d4 d5 c4 dxc4 Nf3 Nf6 e3 e6 Bxc4 c5 O-O a6",
+    "d4 d5 c4 c6 Nf3 Nf6 Nc3 dxc4 a4 Bf5 e3 e6 Bxc4 Bb4",
+    "d4 d5 c4 c6 Nf3 Nf6 Nc3 e6 e3 Nbd7 Bd3 dxc4 Bxc4 b5",
+    "d4 d5 Nf3 Nf6 Bf4 e6 e3 c5 c3 Nc6 Nbd2 Bd6",
+    "d4 Nf6 c4 e6 g3 d5 Bg2 Be7 Nf3 O-O O-O dxc4 Qc2 a6",
+    "d4 Nf6 c4 e6 Nc3 Bb4 e3 O-O Bd3 d5 Nf3 c5",
+    "d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O Be2 e5 O-O Nc6 d5 Ne7",
+    "d4 Nf6 c4 g6 Nc3 d5 cxd5 Nxd5 e4 Nxc3 bxc3 Bg7 Bc4 c5 Ne2 Nc6",
+    "d4 Nf6 c4 e6 Nf3 c5 d5 exd5 cxd5 d6 Nc3 g6",
+    # flank openings
+    "c4 e5 Nc3 Nf6 g3 d5 cxd5 Nxd5 Bg2 Nb6",
+    "c4 c5 Nc3 Nf6 g3 g6 Bg2 Bg7 Nf3 Nc6 O-O",
+    "Nf3 d5 c4 e6 g3 Nf6 Bg2 Be7 O-O O-O b3 c5 Bb2",
+    "d4 f5 g3 Nf6 Bg2 e6 Nf3 Be7 O-O O-O",
+    "e4 e5 d4 exd4 c3 dxc3 Bc4 cxb2 Bxb2",
+]
+BOOK: dict[tuple[str, ...], set[str]] = {}
+for _line in BOOK_LINES:
+    _seq = _line.split()
+    for _i in range(len(_seq)):
+        BOOK.setdefault(tuple(_seq[:_i]), set()).add(_seq[_i])
 
 
 # ---------------------------------------------------------------- detect/open
@@ -62,7 +128,6 @@ def open_engine() -> tuple[chess.engine.SimpleEngine, str, str] | None:
             break
 
     for name, path in candidates:
-        # Stockfish is UCI-only; gnuchess may answer either protocol.
         protocols = ("uci",) if name == "stockfish" else ("uci", "xboard")
         for protocol in protocols:
             engine, opened = _try_open(path, protocol)
@@ -84,7 +149,7 @@ def engine_status() -> dict:
     return {"available": False, "name": None}
 
 
-# ------------------------------------------------------------------ analysis
+# -------------------------------------------------------------------- helpers
 def win_percent(cp: float) -> float:
     """Lichess win-percentage model: centipawns -> [0, 100]."""
     return 50.0 + 50.0 * (2.0 / (1.0 + math.exp(-0.00368208 * cp)) - 1.0)
@@ -97,34 +162,61 @@ def move_accuracy(wp_before: float, wp_after: float) -> float:
     return max(0.0, min(100.0, value))
 
 
-def classify(cpl: int, played_best: bool) -> str:
-    """Human classification from centipawn loss (mover's perspective)."""
-    if played_best:
-        return "best"
-    if cpl <= 10:
-        return "excellent"
-    if cpl <= 25:
-        return "good"
-    if cpl <= 50:
-        return "inaccuracy"
-    if cpl <= 120:
-        return "mistake"
-    return "blunder"
-
-
 def _white_cp(info: dict, mover: chess.Color) -> float:
     """Score from an analyse() info dict, converted to white perspective (pawns)."""
     score = info.get("score")
     if score is None:
         return 0.0
     try:
-        relative = score.relative.score(mate_score=10000)
+        relative = score.relative.score(mate_score=MATE_SCORE_CP)
     except Exception:
         return 0.0
     cp = relative if mover == chess.WHITE else -relative
     return float(max(-1500, min(1500, cp)))
 
 
+def _material_pawns(board: chess.Board, color: chess.Color) -> float:
+    """Material of one side in pawn units."""
+    values = {chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3,
+              chess.ROOK: 5, chess.QUEEN: 9}
+    total = 0.0
+    for piece_type, value in values.items():
+        total += value * len(board.pieces(piece_type, color))
+    return total
+
+
+def _classify_ply(*, is_book: bool, played_best: bool, cpl: int, wpl: float,
+                  gap: float | None, sacrifice_pawns: float,
+                  mover_before: float, mover_after: float) -> str:
+    """chess.com-style classification for a single move (mover perspective).
+
+    All eval inputs are in pawns from the mover's point of view.
+    """
+    if is_book:
+        return "book"
+    if played_best or wpl <= 1:
+        if sacrifice_pawns >= 1.5 and mover_after >= 0.3:
+            return "brilliant"
+        # "great" = rare only-move; meaningless when the position is already
+        # completely decided (then a matching move is simply "best")
+        if gap is not None and gap >= 1.5 and mover_after >= -0.5 \
+                and mover_before <= 5.0:
+            return "great"
+        return "best"
+    if wpl <= 2:
+        return "excellent"
+    if wpl <= 5:
+        return "good"
+    if mover_before >= 2.0 and mover_after <= 0.8:
+        return "miss"  # had a winning position and let it slip
+    if wpl <= 10:
+        return "inaccuracy"
+    if wpl <= 20:
+        return "mistake"
+    return "blunder"
+
+
+# ------------------------------------------------------------------- analysis
 def analyze_game(game, speed: str = "normal", progress=None) -> dict:
     """Blocking full-game analysis; must run in a background thread.
 
@@ -147,14 +239,30 @@ def analyze_game(game, speed: str = "normal", progress=None) -> dict:
         uci_moves = game.uci_list
         total = max(1, len(uci_moves))
         accuracy_by_color: dict[str, list[float]] = {"white": [], "black": []}
+        san_history: list[str] = []
 
         for index, uci in enumerate(uci_moves):
-            # Best move + score in the position BEFORE the played move.
-            info = engine.analyse(board, limit, info=chess.engine.INFO_SCORE)
             mover = board.turn
-            best_cp = _white_cp(info, mover)
-            pv = info.get("pv") or []
+
+            # Best move(s) + score in the position BEFORE the played move.
+            infos = None
+            try:
+                infos = engine.analyse(board, limit, multipv=2,
+                                       info=chess.engine.INFO_ALL)
+            except Exception:
+                infos = None
+            if not isinstance(infos, list):
+                infos = [engine.analyse(board, limit, info=chess.engine.INFO_ALL)]
+
+            best_cp = _white_cp(infos[0], mover)
+            pv = infos[0].get("pv") or []
             best_uci = pv[0].uci() if pv else None
+            gap: float | None = None
+            if len(infos) > 1:
+                second_cp = _white_cp(infos[1], mover)
+                best_for_mover_probe = best_cp if mover == chess.WHITE else -best_cp
+                second_for_mover = second_cp if mover == chess.WHITE else -second_cp
+                gap = max(0.0, best_for_mover_probe - second_for_mover)
 
             try:
                 move = chess.Move.from_uci(uci)
@@ -162,20 +270,40 @@ def analyze_game(game, speed: str = "normal", progress=None) -> dict:
                 move = None
             played_san = board.san(move) if move in board.legal_moves else uci
 
-            # Score in the position AFTER the played move.
+            material_before = _material_pawns(board, mover)
+
+            # Score + material in the position AFTER the played move.
+            # Note: after the push it is the opponent's turn, so the relative
+            # score must be converted from THEIR side of the board.
             after_cp = 0.0
+            material_after = material_before
             if move is not None and move in board.legal_moves:
                 board.push(move)
-                info_after = engine.analyse(board, limit, info=chess.engine.INFO_SCORE)
-                after_cp = _white_cp(info_after, mover)
+                info_after = engine.analyse(board, limit, info=chess.engine.INFO_ALL)
+                after_cp = _white_cp(info_after, board.turn)
+                material_after = _material_pawns(board, mover)
             else:
                 move = None
 
-            # Centipawn loss from the mover's point of view.
+            # Centipawn / win-percentage loss from the mover's point of view.
             best_for_mover = best_cp if mover == chess.WHITE else -best_cp
             after_for_mover = after_cp if mover == chess.WHITE else -after_cp
             cpl = int(max(0.0, best_for_mover - after_for_mover))
             played_best = uci == best_uci or cpl <= 2
+            wpl = win_percent(best_for_mover) - win_percent(after_for_mover)
+
+            is_book = played_san in BOOK.get(tuple(san_history), set())
+
+            cls = _classify_ply(
+                is_book=is_book,
+                played_best=played_best,
+                cpl=cpl,
+                wpl=wpl,
+                gap=gap,
+                sacrifice_pawns=material_before - material_after,
+                mover_before=best_for_mover / 100.0,
+                mover_after=after_for_mover / 100.0,
+            )
 
             wp_before = win_percent(best_for_mover)
             wp_after = win_percent(after_for_mover)
@@ -190,10 +318,11 @@ def analyze_game(game, speed: str = "normal", progress=None) -> dict:
                 "eval_after": round(after_cp / 100.0, 2),
                 "best_uci": best_uci,
                 "cpl": cpl,
-                "class": classify(cpl, played_best),
+                "class": cls,
                 "accuracy": round(accuracy, 1),
             })
 
+            san_history.append(played_san)
             if progress:
                 progress(index + 1, total)
 

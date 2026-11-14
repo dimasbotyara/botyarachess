@@ -320,3 +320,20 @@ Object.assign(ru, {
   'theme.solarized-dark': 'Solarized Dark', 'theme.solarized-light': 'Solarized Light',
   'theme.everforest-dark': 'Everforest Dark', 'theme.everforest-light': 'Everforest Light',
 });
+Object.assign(ru, {
+  'settings.persona.none': 'Обычный ИИ (без персоны)',
+  'review.class.book': 'Книга',
+  'review.class.brilliant': 'Блестящий ход',
+  'review.class.great': 'Замечательный ход',
+  'review.class.miss': 'Упущенный шанс',
+  'review.class.book_desc': 'Ход из известной теоретической базы дебютов — движком не оценивается как плюс или минус.',
+  'review.class.brilliant_desc': 'Очень сильный ход, обычно связанный с выгодной или неожиданной жертвой фигуры в критической позиции.',
+  'review.class.great_desc': 'Ключевой переломный ход — часто единственный выбор, сохраняющий инициативу, выигрыш или позицию.',
+  'review.class.best_desc': 'Самый сильный ход по мнению шахматного движка.',
+  'review.class.excellent_desc': 'Лишь на крошечную долю уступает лучшему ходу — вполне качественный ход.',
+  'review.class.good_desc': 'Нормальный, правильный ход, не портящий позицию.',
+  'review.class.miss_desc': 'Игрок не воспользовался шансом выиграть материал или получить решающее преимущество.',
+  'review.class.inaccuracy_desc': 'Небольшой стратегический или тактический сбой, немного ухудшающий оценку позиции.',
+  'review.class.mistake_desc': 'Заметный промах, существенно ухудшающий позицию или отдающий инициативу.',
+  'review.class.blunder_desc': 'Грубая ошибка, которая коренным образом может изменить исход партии.',
+});

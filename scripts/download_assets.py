@@ -66,7 +66,7 @@ ICONS = [
     "refresh-cw", "plus", "activity", "gauge", "lightbulb", "target", "flame",
     "crown", "shield", "menu", "sun", "moon", "star", "circle-help", "chart-line",
     "book-open", "brain", "trash-2", "external-link", "pipette",
-    "undo-2", "list", "map-pin", "link", "sliders-horizontal", "save", "gauge", "type", "move",
+    "undo-2", "list", "map-pin", "link", "sliders-horizontal", "save", "gauge", "type", "move", "gem",
 ]
 
 

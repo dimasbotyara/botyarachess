@@ -133,10 +133,25 @@ export class ChessBoardUI {
     }
     const added = [...target.entries()];  // squares that need a fresh piece
 
-    const doAnimate = animate && this.animation && !this.viewOnly
-      && removed.length === 1 && added.length === 1;
+    // Pass 2: pair up added pieces with removed pieces of the same type and
+    // colour — that turns captures (pawn vanishes, queen appears on its
+    // square) and castling (two movers) into slide animations instead of a
+    // full re-render.
+    const pairs = [];
+    const consumed = new Set();
+    for (const [toSquare, info] of added) {
+      const matchIdx = removed.findIndex((r, i) => !consumed.has(i)
+        && r.piece.type === info.type && r.piece.color === info.color);
+      if (matchIdx >= 0) {
+        consumed.add(matchIdx);
+        pairs.push({ from: removed[matchIdx], toSquare, info });
+      }
+    }
+    const vanished = removed.filter((_, i) => !consumed.has(i));
 
-    // Non-animated path: rebuild the differences.
+    const doAnimate = animate && this.animation && !this.viewOnly
+      && pairs.length > 0 && pairs.length === added.length;
+
     if (!doAnimate) {
       for (const { square, piece } of removed) {
         piece.el.remove();
@@ -150,27 +165,34 @@ export class ChessBoardUI {
       return;
     }
 
-    // Single-move animation: slide the one moved piece onto its new square.
-    const [{ piece: movingPiece }] = removed;
-    const [toSquare, info] = added[0];
-    const toCell = this.squares.get(toSquare);
-    if (!toCell) return;
-    const fromRect = movingPiece.el.getBoundingClientRect();
-    const toRect = toCell.getBoundingClientRect();
-    this.pieces.delete(removed[0].square);
-    this.pieces.set(toSquare, { ...info, el: movingPiece.el });
-    toCell.append(movingPiece.el);
-    const dx = fromRect.left - toRect.left;
-    const dy = fromRect.top - toRect.top;
-    movingPiece.el.classList.add('animating');
-    movingPiece.el.style.transform = `translate(${dx}px, ${dy}px)`;
-    requestAnimationFrame(() => {
-      movingPiece.el.style.transform = '';
-    });
-    setTimeout(() => {
-      movingPiece.el.classList.remove('animating');
-      movingPiece.el.style.transform = '';
-    }, 220);
+    // Animated path: captured pieces vanish, movers slide to their squares.
+    for (const { square, piece } of vanished) {
+      piece.el.remove();
+      if (this.pieces.get(square) === piece) this.pieces.delete(square);
+    }
+    for (const pair of pairs) {
+      const movingEl = pair.from.piece.el;
+      const fromRect = movingEl.getBoundingClientRect();
+      this.pieces.delete(pair.from.square);
+      this.pieces.set(pair.toSquare, { ...pair.info, el: movingEl });
+      const toCell = this.squares.get(pair.toSquare);
+      if (!toCell) continue;
+      toCell.append(movingEl);
+      const toRect = toCell.getBoundingClientRect();
+      const dx = fromRect.left - toRect.left;
+      const dy = fromRect.top - toRect.top;
+      if (dx || dy) {
+        movingEl.classList.add('animating');
+        movingEl.style.transform = `translate(${dx}px, ${dy}px)`;
+        requestAnimationFrame(() => {
+          movingEl.style.transform = '';
+        });
+        setTimeout(() => {
+          movingEl.classList.remove('animating');
+          movingEl.style.transform = '';
+        }, 220);
+      }
+    }
   }
 
   // ------------------------------------------------------------ highlights

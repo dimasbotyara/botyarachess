@@ -144,6 +144,18 @@ export class GameController {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
     });
 
+    // move navigation (shown once the game is finished)
+    document.getElementById('nav-start')?.addEventListener('click', () => this._jumpTo(0));
+    document.getElementById('nav-prev')?.addEventListener('click', () => this._jumpTo(this.viewPly - 1));
+    document.getElementById('nav-next')?.addEventListener('click', () => this._jumpTo(this.viewPly + 1));
+    document.getElementById('nav-end')?.addEventListener('click', () => this._jumpTo(this.state.moves.length));
+    document.addEventListener('keydown', (e) => {
+      if (!this.overHandled) return;              // only in finished games
+      if (e.target.matches('input, textarea')) return;
+      if (e.key === 'ArrowLeft') this._jumpTo(this.viewPly - 1);
+      if (e.key === 'ArrowRight') this._jumpTo(this.viewPly + 1);
+    });
+
     // manual mode
     $('manual-copy')?.addEventListener('click', () => {
       copyText(this.dom.manualPrompt.value);
@@ -179,9 +191,11 @@ export class GameController {
     this._renderStatus();
     if (state.clocks) this.setClocks(state.clocks);
 
-    if (flags.game_over || finishedNow) {
+    if (flags.game_over || finishedNow || state.status === 'finished') {
       this.board.setViewOnly(true);
-      if (!this.overHandled) {
+      document.getElementById('game-nav')?.classList.add('visible');
+      // the result modal is only for games that just ended on screen
+      if ((flags.game_over || finishedNow) && !this.overHandled) {
         this.overHandled = true;
         if (!silent) sounds.gameEnd();
         this._showResultModal(state);

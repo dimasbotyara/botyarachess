@@ -44,10 +44,12 @@ LANGUAGE_DIRECTIVE = {
 
 
 def persona_for(key: str, custom: str) -> tuple[str, str]:
-    name, description = PERSONAS.get(key, PERSONAS["coach"])
+    """Returns (name, description); description is '' for the plain AI."""
     if key == "custom" and custom.strip():
         return "Custom opponent", custom.strip()
-    return name, description
+    if not key or key not in PERSONAS:
+        return "Chess AI", ""
+    return PERSONAS[key]
 
 
 def legal_moves_text(board: chess.Board) -> str:
@@ -61,6 +63,14 @@ def build_prompt(board: chess.Board, *, ai_color: str, username: str,
                  player_message: str | None, lang: str,
                  persona_key: str, persona_custom: str) -> str:
     persona_name, persona_desc = persona_for(persona_key, persona_custom)
+    if persona_desc:
+        intro = (f"You are {persona_name}: {persona_desc}\n"
+                 f"You are playing a friendly game of chess as {ai_color.capitalize()} "
+                 f"against a human player named {username}.\n"
+                 "You love chess and enjoy chatting between moves.")
+    else:
+        intro = (f"You are a chess-playing AI in a friendly game of chess as "
+                 f"{ai_color.capitalize()} against a human player named {username}.")
     history = " ".join(san_history) or "none yet — this is the first move"
     last = last_move_san or "none yet — the game just started"
     message = (player_message or "").strip()
@@ -69,9 +79,7 @@ def build_prompt(board: chess.Board, *, ai_color: str, username: str,
     else:
         message_block = "The player did not send a message this turn."
 
-    return f"""You are {persona_name}: {persona_desc}
-You are playing a friendly game of chess as {ai_color.capitalize()} against a human player named {username}.
-You love chess and enjoy chatting between moves.
+    return f"""{intro}
 
 --- CURRENT POSITION ---
 FEN: {board.fen()}

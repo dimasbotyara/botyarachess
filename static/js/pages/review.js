@@ -12,13 +12,22 @@ preloadPieces();
 unlockAudio();
 
 const CLASS_ICON = {
+  book: 'book-open',
+  brilliant: 'gem',
+  great: 'sparkles',
   best: 'crown',
   excellent: 'star',
   good: 'check',
+  miss: 'target',
   inaccuracy: 'info',
   mistake: 'triangle-alert',
   blunder: 'flame',
 };
+
+function classTooltip(cls) {
+  const desc = t(`review.class.${cls}_desc`);
+  return `${t('review.class.' + cls)} — ${desc}`;
+}
 
 const root = document.getElementById('review-root');
 const gameData = JSON.parse(root.dataset.game);
@@ -63,7 +72,11 @@ function showPly(n) {
   const evalNode = document.getElementById('eval-info');
   if (evalNode) {
     if (current) {
-      evalNode.textContent = `${t('review.evaluation')}: ${current.eval_after > 0 ? '+' : ''}${current.eval_after} · ${t('review.class.' + current['class'])}`;
+      const cls = current['class'];
+      const clsIcon = CLASS_ICON[cls] || 'info';
+      const label = `<span class="cls-${cls}" style="display:inline-flex;align-items:center;gap:5px">
+        <span class="cls-icon">${icon(clsIcon)}</span>${t('review.class.' + cls)}</span>`;
+      evalNode.innerHTML = `${t('review.evaluation')}: ${current.eval_after > 0 ? '+' : ''}${current.eval_after} · ${label}`;
     } else {
       evalNode.textContent = '';
     }
@@ -90,6 +103,7 @@ function buildMoveList() {
       const node = el(`span.move${cls ? ' cls-' + cls : ''}`, {
         dataset: { ply: move.ply },
         onclick: () => showPly(move.ply),
+        title: cls ? classTooltip(cls) : '',
       }, move.san);
       if (cls && analysis) {
         const holder = el('span.cls-icon');

@@ -36,7 +36,7 @@ DEFAULT_AI = {
     "base_url": "",         # for the generic OpenAI-compatible provider
     "lm_host": "",          # LM Studio: hostname or IP (no scheme/port)
     "lm_port": 1234,
-    "persona": "coach",     # coach | gm | trash | custom
+    "persona": "",          # "" = plain AI, no persona prompt
     "persona_custom": "",
     "chat_enabled": True,
     "temperature": 0.7,

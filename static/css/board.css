@@ -401,3 +401,20 @@
 .stat-box .v.loss { color: var(--danger); }
 .stat-box .v.draw { color: var(--warning); }
 .stat-box .k { font-size: .76rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+
+/* classification colours (chess.com-style) */
+.cls-book { color: var(--text-muted); }
+.cls-brilliant { color: #26c2a3; font-weight: 700; }
+.cls-great { color: #5c8bb0; font-weight: 700; }
+.cls-miss { color: var(--warning); }
+.cls-best { color: var(--success); }
+.cls-excellent { color: var(--success); }
+.cls-good { color: var(--text-muted); }
+.cls-inaccuracy { color: var(--warning); }
+.cls-mistake { color: var(--danger); }
+.cls-blunder { color: var(--danger); font-weight: 700; }
+
+/* move navigation on the game page (finished games) */
+.game-nav { display: none; gap: 6px; justify-content: center; margin-top: 10px; }
+.game-nav.visible { display: flex; }
+.game-nav .btn { padding: 8px 10px; }
