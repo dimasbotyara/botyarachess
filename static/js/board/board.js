@@ -277,8 +277,11 @@ export class ChessBoardUI {
   }
 
   _ownPieceColor() {
-    // colour allowed to move pieces; null = both (hotseat)
-    return this.opts.movableColor || null;
+    // colour allowed to move pieces; null = both (hotseat).
+    // Callers pass full colour names ("white"/"black"), while piece colors
+    // come from the FEN parser as "w"/"b" — normalise to the FEN letter.
+    const color = this.opts.movableColor;
+    return color ? color[0] : null;
   }
 
   _canTouch(piece) {
