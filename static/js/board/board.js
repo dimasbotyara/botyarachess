@@ -151,8 +151,7 @@ export class ChessBoardUI {
 
     // viewOnly blocks *input*, not animations — review / finished games
     // still want sliding pieces.
-    const doAnimate = animate && this.animation
-      && pairs.length > 0 && pairs.length === added.length;
+    const doAnimate = animate && this.animation && pairs.length > 0;
 
     if (!doAnimate) {
       for (const { square, piece } of removed) {
@@ -167,10 +166,20 @@ export class ChessBoardUI {
       return;
     }
 
-    // Animated path: captured pieces vanish, movers slide to their squares.
+    // Animated path: matched pieces slide, captured pieces vanish with a
+    // fade, re-appearing pieces (stepping backwards over a capture) pop in.
     for (const { square, piece } of vanished) {
-      piece.el.remove();
       if (this.pieces.get(square) === piece) this.pieces.delete(square);
+      piece.el.classList.add('vanishing');
+      setTimeout(() => piece.el.remove(), 200);
+    }
+    for (const [square, info] of added) {
+      if (pairs.some((p) => p.toSquare === square)) continue; // handled below
+      const pieceEl = this._makePieceEl(info.type, info.color);
+      pieceEl.classList.add('spawning');
+      this.pieces.set(square, { ...info, el: pieceEl });
+      this.squares.get(square)?.append(pieceEl);
+      setTimeout(() => pieceEl.classList.remove('spawning'), 220);
     }
     for (const pair of pairs) {
       const movingEl = pair.from.piece.el;
@@ -184,15 +193,19 @@ export class ChessBoardUI {
       const dx = fromRect.left - toRect.left;
       const dy = fromRect.top - toRect.top;
       if (dx || dy) {
-        movingEl.classList.add('animating');
+        // FLIP without requestAnimationFrame (rAF never fires in throttled or
+        // hidden tabs, which turned every animation into an instant jump).
+        // Order matters: commit the offset WITHOUT any transition, then
+        // enable the transition and clear the transform so the browser
+        // interpolates from the committed start value to the rest position.
         movingEl.style.transform = `translate(${dx}px, ${dy}px)`;
-        requestAnimationFrame(() => {
-          movingEl.style.transform = '';
-        });
+        void movingEl.offsetWidth;           // commit the start value
+        movingEl.classList.add('animating'); // transition: transform .16s
+        movingEl.style.transform = '';       // animate back to rest
         setTimeout(() => {
           movingEl.classList.remove('animating');
           movingEl.style.transform = '';
-        }, 220);
+        }, 240);
       }
     }
   }
@@ -296,6 +309,8 @@ export class ChessBoardUI {
     }
     if (!this._canTouch(piece)) return;
 
+    // a simple click just selects the square (legal dots show up);
+    // only holding + moving the pointer spawns the drag ghost
     this.selected = square;
     const targets = this.getLegalTargets(square);
     this.setHighlights({
@@ -305,24 +320,33 @@ export class ChessBoardUI {
       legalTargets: targets,
     });
 
-    // begin drag
-    const ghost = piece.el.cloneNode(true);
-    ghost.classList.add('dragging');
-    document.body.append(ghost);
     this.drag = {
       from: square,
-      ghost,
+      ghost: null,
       startX: e.clientX,
       startY: e.clientY,
       moved: false,
       pointerId: e.pointerId,
     };
-    this._placeGhost(e);
+  }
+
+  _ensureGhost(e) {
+    if (!this.drag || this.drag.ghost) return;
+    const piece = this.pieces.get(this.drag.from);
+    if (!piece) return;
+    const rect = piece.el.getBoundingClientRect();
+    const ghost = piece.el.cloneNode(true);
+    ghost.classList.add('dragging');
+    ghost.style.width = `${rect.width}px`;
+    ghost.style.height = `${rect.height}px`;
+    document.body.append(ghost);
+    this.drag.ghost = ghost;
     piece.el.style.opacity = '0.25';
+    this._placeGhost(e);
   }
 
   _placeGhost(e) {
-    if (!this.drag) return;
+    if (!this.drag?.ghost) return;
     this.drag.ghost.style.left = `${e.clientX}px`;
     this.drag.ghost.style.top = `${e.clientY}px`;
   }
@@ -331,7 +355,10 @@ export class ChessBoardUI {
     if (!this.drag || e.pointerId !== this.drag.pointerId) return;
     const dx = e.clientX - this.drag.startX;
     const dy = e.clientY - this.drag.startY;
-    if (!this.drag.moved && Math.hypot(dx, dy) > 6) this.drag.moved = true;
+    if (!this.drag.moved && Math.hypot(dx, dy) > 6) {
+      this.drag.moved = true;
+      this._ensureGhost(e);
+    }
     if (this.drag.moved) {
       e.preventDefault();
       this._placeGhost(e);
@@ -344,7 +371,7 @@ export class ChessBoardUI {
     this.drag = null;
     const piece = this.pieces.get(drag.from);
     if (piece) piece.el.style.opacity = '';
-    drag.ghost.remove();
+    drag.ghost?.remove();
 
     const target = this._squareFromEvent(e);
     if (drag.moved) {
