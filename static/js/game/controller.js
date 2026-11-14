@@ -18,6 +18,12 @@ preloadPieces();
 const PIECE_VALUES = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
 const START_COUNTS = { p: 8, n: 2, b: 2, r: 2, q: 1, k: 1 };
 
+const CLASS_ICON = {
+  book: 'book-open', brilliant: 'gem', great: 'sparkles', best: 'crown',
+  excellent: 'star', good: 'check', miss: 'target', inaccuracy: 'info',
+  mistake: 'triangle-alert', blunder: 'flame',
+};
+
 export class GameController {
   constructor({ mode, state, myColor, isPlayer, transport, boardEl }) {
     this.mode = mode;
@@ -46,6 +52,8 @@ export class GameController {
     this._wireControls();
     this.applyState(state, { silent: true });
     this._renderChat(state.chat || []);
+    // finished games with saved analysis get class icons in the move list
+    if (state.status === 'finished') this._loadAnalysis();
     if (mode === 'ai' && (transport.ai || {}).chat_enabled === false) {
       document.getElementById('ai-chat')?.classList.add('hidden');
       document.getElementById('ai-chat')?.remove();
@@ -295,24 +303,47 @@ export class GameController {
     }
   }
 
+  /** Load the engine analysis (finished games) for move-list badges. */
+  async _loadAnalysis() {
+    try {
+      const data = await import('../core/api.js').then((m) =>
+        m.api(`/api/games/${this.state.id}/analysis`));
+      if (data.analysis?.plies?.length) {
+        this.analysis = data.analysis;
+        this._renderMoves();
+      }
+    } catch { /* no analysis — plain list is fine */ }
+  }
+
   _renderMoves() {
     const list = this.dom.moveList;
     if (!list) return;
     const moves = this.state.moves;
     const rows = [];
+
+    const moveSpan = (move, ply) => {
+      if (!move) return el('span.move', {}, '');
+      const node = el('span.move', {
+        dataset: { ply },
+        onclick: () => this._jumpTo(ply),
+      }, move.san);
+      const plyData = this.analysis?.plies?.[ply - 1];
+      const cls = plyData?.['class'];
+      if (cls) {
+        node.classList.add(`cls-${cls}`);
+        node.title = `${t('review.class.' + cls)} — ${t(`review.class.${cls}_desc`)}`;
+        const holder = el('span.cls-icon');
+        holder.innerHTML = icon(CLASS_ICON[cls] || 'info');
+        node.append(holder);
+      }
+      return node;
+    };
+
     for (let i = 0; i < moves.length; i += 2) {
-      const white = moves[i];
-      const black = moves[i + 1];
       rows.push(el('li', {},
         el('span.move-num', {}, `${i / 2 + 1}.`),
-        el('span.move', {
-          dataset: { ply: i + 1 },
-          onclick: () => this._jumpTo(i + 1),
-        }, white.san),
-        black ? el('span.move', {
-          dataset: { ply: i + 2 },
-          onclick: () => this._jumpTo(i + 2),
-        }, black.san) : el('span.move', {}, ''),
+        moveSpan(moves[i], i + 1),
+        moveSpan(moves[i + 1], i + 2),
       ));
     }
     const ol = el('ol', {}, rows);

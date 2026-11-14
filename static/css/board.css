@@ -439,3 +439,28 @@
 
 /* review board: slightly smaller so the nav row fits the first screen */
 .review-layout .board-wrap { max-width: min(520px, 100%); }
+
+/* review side panel: players + result summary */
+.review-player {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.review-player .avatar { width: 32px; height: 32px; }
+.review-player .rp-info { flex: 1; min-width: 0; }
+.review-player .rp-name {
+  font-weight: 600; font-size: .92rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.review-player .rp-color { color: var(--text-muted); font-size: .76rem; font-weight: 500; }
+.review-player .accuracy-bar { margin-top: 5px; }
+.review-player .rp-acc { font-size: .84rem; font-weight: 700; color: var(--success); min-width: 44px; text-align: right; }
+.result-row {
+  display: flex; align-items: center; gap: 9px;
+  padding-top: 12px;
+}
+.result-term { color: var(--text-muted); font-size: .84rem; }
+
+/* classification icons inside the plain game move list */
+.moves-list .cls-icon { width: 14px; height: 14px; }
+.moves-list .move { display: inline-flex; align-items: center; gap: 5px; }

@@ -81,3 +81,13 @@
   .icon-btn { width: 40px; height: 40px; }
   .nav a { padding: 10px 14px; }
 }
+
+@media (max-width: 640px) {
+  /* wide game tables scroll inside the page instead of breaking the layout */
+  .table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}

@@ -8,25 +8,7 @@
      data-my-color="{{ game.color_of(current_user.id) or '' }}"
      class="review-layout">
   <div class="game-main">
-    <div class="player-bar" id="player-top">
-      <span class="avatar">{{ (game.black.username if game.black else 'AI')[0] }}</span>
-      <div>
-        <div class="p-name">{{ game.black.username if game.black else 'AI' }}</div>
-        <div class="p-sub">{{ 'Black' }}</div>
-      </div>
-      <div class="spacer"></div>
-    </div>
-
     <div class="board-wrap" id="board"></div>
-
-    <div class="player-bar" id="player-bottom">
-      <span class="avatar">{{ (game.white.username if game.white else 'AI')[0] }}</span>
-      <div>
-        <div class="p-name">{{ game.white.username if game.white else 'AI' }}</div>
-        <div class="p-sub">{{ 'White' }}</div>
-      </div>
-      <div class="spacer"></div>
-    </div>
 
     <div class="review-nav">
       <button class="btn nav-btn" id="btn-start" data-i18n-title="review.first"><span data-icon="chevrons-left"></span></button>
@@ -45,6 +27,33 @@
       <h2><span data-icon="gauge"></span> <span data-i18n="review.title">Game review</span></h2>
       <div class="badge engine-badge" id="engine-name">
         <span data-icon="cpu"></span> {{ game.mode }}
+      </div>
+
+      <!-- players + result -->
+      <div class="review-player">
+        <span class="avatar">{{ (game.white.username if game.white else 'AI')[0] }}</span>
+        <div class="rp-info">
+          <div class="rp-name">{{ game.white.username if game.white else 'AI' }}
+            <span class="rp-color" data-i18n="common.white">White</span></div>
+          <div class="accuracy-bar"><div id="acc-white-bar"></div></div>
+        </div>
+        <div class="rp-acc mono" id="acc-white-value"></div>
+      </div>
+      <div class="review-player">
+        <span class="avatar">{{ (game.black.username if game.black else 'AI')[0] }}</span>
+        <div class="rp-info">
+          <div class="rp-name">{{ game.black.username if game.black else 'AI' }}
+            <span class="rp-color" data-i18n="common.black">Black</span></div>
+          <div class="accuracy-bar"><div id="acc-black-bar"></div></div>
+        </div>
+        <div class="rp-acc mono" id="acc-black-value"></div>
+      </div>
+      <div class="result-row">
+        <span class="badge {% if game.result == '1/2-1/2' %}badge-warning{% else %}badge-accent{% endif %}">
+          <span data-icon="{{ 'handshake' if game.result == '1/2-1/2' else 'trophy' }}"></span>
+          {{ game.result }}
+        </span>
+        <span class="result-term">{{ game.termination or '' }}</span>
       </div>
 
       <div id="review-unavailable" class="hidden" style="margin-top:12px">
@@ -66,21 +75,6 @@
         </button>
         <div class="input-hint mono" id="review-progress" style="margin-top:8px"></div>
         {% endif %}
-      </div>
-
-      <div id="review-content" class="hidden" style="margin-top:14px">
-        <div class="accuracy-row">
-          <div class="acc">
-            <div class="acc-label" id="white-name">White</div>
-            <div class="accuracy-bar"><div id="acc-white-bar"></div></div>
-            <div class="mono" style="font-size:.8rem" id="acc-white-value"></div>
-          </div>
-          <div class="acc">
-            <div class="acc-label" id="black-name">Black</div>
-            <div class="accuracy-bar"><div id="acc-black-bar"></div></div>
-            <div class="mono" style="font-size:.8rem" id="acc-black-value"></div>
-          </div>
-        </div>
       </div>
     </div>
 

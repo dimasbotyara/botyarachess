@@ -149,7 +149,9 @@ export class ChessBoardUI {
     }
     const vanished = removed.filter((_, i) => !consumed.has(i));
 
-    const doAnimate = animate && this.animation && !this.viewOnly
+    // viewOnly blocks *input*, not animations — review / finished games
+    // still want sliding pieces.
+    const doAnimate = animate && this.animation
       && pairs.length > 0 && pairs.length === added.length;
 
     if (!doAnimate) {

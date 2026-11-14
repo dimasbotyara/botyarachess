@@ -177,16 +177,13 @@ function drawGraph() {
 function renderAnalysis() {
   document.getElementById('review-loading')?.classList.add('hidden');
   document.getElementById('review-content')?.classList.remove('hidden');
-  document.getElementById('engine-name').textContent = `${t('review.engine')}: ${analysis.engine}`;
+  document.getElementById('engine-name').innerHTML =
+    `${icon('cpu')} ${t('review.engine')}: ${analysis.engine}`;
   const acc = analysis.accuracy;
-  const whiteAcc = myColor() === 'white' ? acc.white : acc.black;
-  const blackAcc = myColor() === 'white' ? acc.black : acc.white;
-  document.getElementById('acc-white-bar').style.width = `${whiteAcc}%`;
-  document.getElementById('acc-black-bar').style.width = `${blackAcc}%`;
-  document.getElementById('acc-white-value').textContent = `${whiteAcc}%`;
-  document.getElementById('acc-black-value').textContent = `${blackAcc}%`;
-  document.getElementById('white-name').textContent = gameData.players.white.username;
-  document.getElementById('black-name').textContent = gameData.players.black.username;
+  document.getElementById('acc-white-bar').style.width = `${acc.white}%`;
+  document.getElementById('acc-black-bar').style.width = `${acc.black}%`;
+  document.getElementById('acc-white-value').textContent = `${acc.white}%`;
+  document.getElementById('acc-black-value').textContent = `${acc.black}%`;
   buildMoveList();
   drawGraph();
 }
