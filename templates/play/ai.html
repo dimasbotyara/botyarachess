@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}botyarachess — vs AI{% endblock %}
+{% block page_class %}page-narrow{% endblock %}
+{% block content %}
+<div class="page-head">
+  <span data-icon="cpu"></span>
+  <h1 data-i18n="home.ai">Play vs AI</h1>
+</div>
+
+<div class="card">
+  <h3 data-i18n="settings.ai_desc">Used in the “Play vs AI” mode</h3>
+  <p style="color:var(--text-muted);font-size:.88rem" data-i18n="home.ai_desc">
+    LLM opponent that talks to you — configure providers in Settings.
+  </p>
+  <form id="ai-start-form">
+    <div class="field">
+      <label><span data-icon="users"></span><span data-i18n="common.white">White</span> / <span data-i18n="common.black">Black</span></label>
+      <select id="ai-color">
+        <option value="white" data-i18n="common.white">White</option>
+        <option value="black" data-i18n="common.black">Black</option>
+        <option value="random" data-i18n="settings.auto">Auto</option>
+      </select>
+    </div>
+    <div class="check-row" style="margin-bottom:15px">
+      <input type="checkbox" id="ai-chat-on" checked>
+      <span data-i18n="settings.ai_chat">AI chat enabled</span>
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" type="submit">
+      <span data-icon="swords"></span><span data-i18n="game.new_game">New game</span>
+    </button>
+  </form>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h3><span data-icon="bot"></span> <span data-i18n="settings.ai">AI opponent</span></h3>
+  <p style="color:var(--text-muted);font-size:.88rem">
+    <span data-i18n="settings.ai_desc">Used in the “Play vs AI” mode</span>
+    — <a href="/settings" data-i18n="nav.settings">Settings</a>
+  </p>
+  <div class="badge badge-accent" id="provider-badge">
+    <span data-icon="server"></span> {{ provider_labels.get(current_user.ai.provider, 'manual') }}
+    {% if current_user.ai.model %}· {{ current_user.ai.model }}{% endif %}
+    {% if current_user.ai.provider == 'lmstudio' and current_user.ai.lm_host %}
+      · {{ current_user.ai.lm_host }}:{{ current_user.ai.lm_port }}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module">
+  import { api } from '/static/js/core/api.js';
+  import { toastError } from '/static/js/core/ui.js';
+
+  document.getElementById('ai-start-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const color = document.getElementById('ai-color').value;
+    try {
+      const { game_id } = await api('/api/games/ai', { method: 'POST', body: { color } });
+      window.location.href = `/game/${game_id}`;
+    } catch (error) { toastError(error); }
+  });
+</script>
+{% endblock %}

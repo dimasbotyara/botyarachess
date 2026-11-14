@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}botyarachess — register{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/board.css">{% endblock %}
+{% block page_class %}page-narrow{% endblock %}
+{% block content %}
+<div class="card auth-card">
+  <div class="logo-big">
+    <span data-icon="crown"></span><span>botyarachess</span>
+  </div>
+  <h2 data-i18n="auth.register_title">Create account</h2>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field">
+      <label><span data-icon="user"></span><span data-i18n="auth.username">Username</span></label>
+      <input type="text" name="username" required autofocus
+             autocomplete="username" minlength="3" maxlength="32">
+    </div>
+    <div class="field">
+      <label><span data-icon="key-round"></span><span data-i18n="auth.password">Password</span></label>
+      <input type="password" name="password" required minlength="6" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label><span data-icon="shield"></span><span data-i18n="auth.confirm">Confirm password</span></label>
+      <input type="password" name="confirm" required minlength="6" autocomplete="new-password">
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" type="submit">
+      <span data-icon="user-plus"></span><span data-i18n="auth.register_btn">Sign up</span>
+    </button>
+  </form>
+  <div class="auth-alt">
+    <span data-i18n="auth.have_account">Already have an account?</span>
+    <a href="/login" data-i18n="nav.login">Log in</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+/* ==========================================================================
+   Mobile adaptation: <=900px the game layout stacks; <=600px compact header.
+   ========================================================================== */
+
+@media (max-width: 940px) {
+  .game-layout,
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
+  .game-side { order: 2; }
+  .ai-chat { order: -1; }
+
+  .lobby-grid { grid-template-columns: 1fr; }
+
+  .moves-list { max-height: 180px; }
+
+  .page { padding: 18px 14px 48px; }
+}
+
+#hamburger { display: none; }
+
+@media (max-width: 640px) {
+  body { font-size: 14px; }
+
+  .site-header { padding: 8px 10px; gap: 6px; }
+  .nav {
+    position: fixed;
+    top: 54px; left: 0; right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--bg-alt);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    margin: 0;
+    display: none;
+    z-index: 49;
+    box-shadow: var(--shadow);
+  }
+  .nav.open { display: flex; }
+  .nav a { padding: 12px 14px; border-radius: 10px; font-size: .98rem; }
+
+  #hamburger { display: inline-flex; }
+
+  .user-chip .username { display: none; }
+  .user-chip .rating { display: none; }
+
+  .page { padding: 14px 10px 40px; }
+  .page-head h1 { font-size: 1.25rem; }
+  .page-head .icon { width: 22px; height: 22px; }
+
+  .card { padding: 14px; border-radius: 14px; }
+
+  .clock { font-size: 1rem; min-width: 76px; padding: 5px 10px; }
+
+  .modal { max-width: 100%; }
+
+  .promo-row button { width: 56px; height: 56px; }
+
+  /* modals behave as bottom sheets on phones */
+  .modal-backdrop { align-items: flex-end; padding: 0; }
+  .modal {
+    border-radius: 18px 18px 0 0;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: sheet-in .2s ease;
+  }
+  @keyframes sheet-in {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  #toasts { top: 58px; right: 8px; left: 8px; max-width: none; }
+
+  .table { font-size: .82rem; }
+  .table th, .table td { padding: 8px 8px; }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  /* larger touch targets on touch devices */
+  .btn { padding: 11px 18px; }
+  .icon-btn { width: 40px; height: 40px; }
+  .nav a { padding: 10px 14px; }
+}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}botyarachess — profile{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/board.css">{% endblock %}
+{% block content %}
+<div class="page-head">
+  <span data-icon="user"></span>
+  <h1>{{ current_user.username }}</h1>
+  <span class="spacer"></span>
+  <span class="badge badge-accent"><span data-icon="chart-line"></span> {{ current_user.rating }}</span>
+</div>
+
+<div class="card">
+  <h2 data-i18n="profile.stats">Statistics</h2>
+  <div class="stats-grid">
+    <div class="stat-box"><div class="v">{{ current_user.rating }}</div><div class="k" data-i18n="profile.rating">Rating</div></div>
+    <div class="stat-box"><div class="v win">{{ current_user.wins }}</div><div class="k" data-i18n="profile.wins">Wins</div></div>
+    <div class="stat-box"><div class="v loss">{{ current_user.losses }}</div><div class="k" data-i18n="profile.losses">Losses</div></div>
+    <div class="stat-box"><div class="v draw">{{ current_user.draws }}</div><div class="k" data-i18n="profile.draws">Draws</div></div>
+    <div class="stat-box"><div class="v">{{ current_user.total_games }}</div><div class="k" data-i18n="profile.total">Games</div></div>
+  </div>
+  <p style="margin-top:14px;color:var(--text-muted);font-size:.85rem">
+    <span data-icon="clock"></span>
+    <span data-i18n="profile.member_since">Member since</span>
+    {{ current_user.created_at.strftime('%d.%m.%Y') }}
+  </p>
+</div>
+
+<h2 style="margin-top:22px" data-i18n="profile.history">Recent games</h2>
+{% if games %}
+<div class="card" style="padding:6px 0">
+  <table class="table">
+    <thead>
+      <tr>
+        <th data-i18n="history.date">Date</th>
+        <th data-i18n="history.mode">Mode</th>
+        <th data-i18n="history.players">Players</th>
+        <th data-i18n="history.result">Result</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for game in games %}
+      <tr>
+        <td>{{ game.finished_at.strftime('%d.%m %H:%M') if game.finished_at }}</td>
+        <td><span class="badge">{{ game.mode }}{% if game.rated %} · ★{% endif %}</span></td>
+        <td>{{ game.white.username if game.white else 'AI' }} vs {{ game.black.username if game.black else 'AI' }}</td>
+        <td>
+          {% if game.winner_color() == (game.color_of(current_user.id) or '') %}
+          <span class="badge badge-success" data-i18n="game.victory">Victory!</span>
+          {% elif game.result == '1/2-1/2' %}
+          <span class="badge badge-warning" data-i18n="game.drawn">Draw</span>
+          {% else %}
+          <span class="badge badge-danger" data-i18n="game.defeat">Defeat</span>
+          {% endif %}
+        </td>
+        <td style="text-align:right">
+          <a class="btn" href="/review/{{ game.id }}"><span data-icon="gauge"></span><span data-i18n="history.review">Review</span></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card empty-state">
+  <span data-icon="swords"></span>
+  <div data-i18n="profile.no_games">No finished games yet.</div>
+</div>
+{% endif %}
+{% endblock %}

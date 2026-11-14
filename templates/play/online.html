@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}botyarachess — online{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/board.css">{% endblock %}
+{% block content %}
+<div class="page-head">
+  <span data-icon="users"></span>
+  <h1 data-i18n="lobby.title">Online lobby</h1>
+</div>
+
+<div class="queue-banner hidden" id="queue-banner">
+  <span data-icon="timer"></span>
+  <span style="flex:1" data-i18n="lobby.waiting">Looking for an opponent…</span>
+  <button class="btn" id="btn-cancel-queue" data-i18n="lobby.cancel_queue">Cancel</button>
+</div>
+
+<div class="lobby-grid">
+  <div class="card">
+    <h3><span data-icon="zap"></span> <span data-i18n="lobby.quick">Quick match</span></h3>
+    <p style="color:var(--text-muted);font-size:.86rem" data-i18n="lobby.queue_hint">
+      Press “Quick match” and keep this tab open
+    </p>
+    <div class="field">
+      <label><span data-icon="clock"></span><span data-i18n="lobby.tc">Time control</span></label>
+      <select id="lobby-tc">
+        <option value="1+0">Bullet · 1+0</option>
+        <option value="3+2" selected>Blitz · 3+2</option>
+        <option value="5+0">Blitz · 5+0</option>
+        <option value="10+0">Rapid · 10+0</option>
+      </select>
+    </div>
+    <div class="check-row" style="margin-bottom:14px">
+      <input type="checkbox" id="lobby-rated" checked>
+      <span data-i18n="lobby.rated">Rated</span>
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" id="btn-quick">
+      <span data-icon="play"></span><span data-i18n="lobby.quick">Quick match</span>
+    </button>
+  </div>
+
+  <div class="card">
+    <h3><span data-icon="plus"></span> <span data-i18n="lobby.create">Create challenge</span></h3>
+    <form id="create-form">
+      <div class="field">
+        <label><span data-icon="clock"></span><span data-i18n="lobby.tc">Time control</span></label>
+        <select id="create-tc">
+          <option value="1+0">Bullet · 1+0</option>
+          <option value="3+2" selected>Blitz · 3+2</option>
+          <option value="5+0">Blitz · 5+0</option>
+          <option value="10+0">Rapid · 10+0</option>
+        </select>
+      </div>
+      <div class="check-row" style="margin-bottom:14px">
+        <input type="checkbox" id="create-rated">
+        <span data-i18n="lobby.rated">Rated</span>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">
+        <span data-icon="plus"></span><span data-i18n="lobby.create_btn">Create</span>
+      </button>
+    </form>
+    <div style="height:14px"></div>
+    <h3><span data-icon="key-round"></span> <span data-i18n="lobby.join_code">Join by code</span></h3>
+    <form id="join-form" style="display:flex;gap:8px">
+      <input type="text" id="join-code" placeholder="ABC123" maxlength="6"
+             style="text-transform:uppercase;font-family:'JetBrains Mono',monospace">
+      <button class="btn" type="submit"><span data-icon="play"></span><span data-i18n="lobby.join_btn">Join</span></button>
+    </form>
+  </div>
+</div>
+
+<div style="height:16px"></div>
+<h2><span data-icon="swords"></span> <span data-i18n="lobby.open_challenges">Open challenges</span></h2>
+<div id="challenge-list" class="card" style="padding:14px"></div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/js/pages/lobby.js"></script>
+{% endblock %}

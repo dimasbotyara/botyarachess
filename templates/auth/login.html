@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}botyarachess — login{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/board.css">{% endblock %}
+{% block page_class %}page-narrow{% endblock %}
+{% block content %}
+<div class="card auth-card">
+  <div class="logo-big">
+    <span data-icon="crown"></span><span>botyarachess</span>
+  </div>
+  <h2 data-i18n="auth.login_title">Welcome back</h2>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field">
+      <label><span data-icon="user"></span><span data-i18n="auth.username">Username</span></label>
+      <input type="text" name="username" required autofocus autocomplete="username">
+    </div>
+    <div class="field">
+      <label><span data-icon="key-round"></span><span data-i18n="auth.password">Password</span></label>
+      <input type="password" name="password" required autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" type="submit">
+      <span data-icon="log-in"></span><span data-i18n="auth.login_btn">Log in</span>
+    </button>
+  </form>
+  <div class="auth-alt">
+    <span data-i18n="auth.no_account">No account yet?</span>
+    <a href="/register" data-i18n="nav.register">Sign up</a>
+  </div>
+</div>
+{% endblock %}

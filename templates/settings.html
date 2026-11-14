@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block title %}botyarachess — settings{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/board.css">{% endblock %}
+{% block content %}
+<div id="settings-root" data-ai='{{ current_user.masked_ai() | tojson }}'></div>
+<div class="page-head">
+  <span data-icon="settings"></span>
+  <h1 data-i18n="settings.title">Settings</h1>
+</div>
+
+<div class="tabs" id="settings-tabs">
+  <button class="tab active" data-tab="appearance"><span data-icon="palette"></span> <span data-i18n="settings.tab_appearance">Appearance</span></button>
+  <button class="tab" data-tab="board"><span data-icon="monitor-play"></span> <span data-i18n="settings.tab_board">Board</span></button>
+  <button class="tab" data-tab="language"><span data-icon="globe"></span> <span data-i18n="settings.tab_language">Language</span></button>
+  <button class="tab" data-tab="ai"><span data-icon="cpu"></span> <span data-i18n="settings.tab_ai">AI opponent</span></button>
+  <button class="tab" data-tab="security"><span data-icon="shield"></span> <span data-i18n="settings.tab_security">Security</span></button>
+  <button class="tab" data-tab="system"><span data-icon="server"></span> <span data-i18n="settings.tab_system">System</span></button>
+</div>
+
+<!-- ============================== APPEARANCE ============================== -->
+<section class="settings-section active" data-section="appearance">
+  <div class="card">
+    <h2><span data-icon="palette"></span> <span data-i18n="settings.site_theme">Site theme</span></h2>
+    <p style="color:var(--text-muted);font-size:.86rem" data-i18n="settings.appearance_desc">
+      Theme switches instantly, without reloading
+    </p>
+    <div class="theme-grid" id="theme-grid"></div>
+  </div>
+
+  <div class="card">
+    <h2><span data-icon="pipette"></span> <span data-i18n="settings.accent">Accent color</span></h2>
+    <p style="color:var(--text-muted);font-size:.86rem" data-i18n="settings.accent_desc">
+      Palette is unique for each theme
+    </p>
+    <div class="qs-accent-row" id="accent-row"></div>
+  </div>
+
+  <div class="card">
+    <h2><span data-icon="sliders-horizontal"></span> <span data-i18n="settings.board">Interface</span></h2>
+    <div class="field">
+      <label><span data-icon="type"></span><span data-i18n="settings.font_size">Interface font size</span></label>
+      <select id="font-size">
+        <option value="small" data-i18n="settings.font_small">Small</option>
+        <option value="normal" data-i18n="settings.font_normal">Normal</option>
+        <option value="large" data-i18n="settings.font_large">Large</option>
+      </select>
+    </div>
+    <div class="toggle-row">
+      <span data-icon="sparkles"></span>
+      <div class="t-info">
+        <strong data-i18n="settings.reduce_motion">Reduce motion</strong>
+        <span data-i18n="settings.reduce_motion_desc">Disable animations</span>
+      </div>
+      <label class="switch"><input type="checkbox" id="reduce-motion"><span class="slider"></span></label>
+    </div>
+  </div>
+</section>
+
+<!-- ================================= BOARD ============================== -->
+<section class="settings-section" data-section="board">
+  <div class="card">
+    <h2><span data-icon="monitor-play"></span> <span data-i18n="settings.board_theme">Board colors</span></h2>
+    <p style="color:var(--text-muted);font-size:.86rem" data-i18n="settings.board_theme_desc">
+      Independent of the site theme
+    </p>
+    <div class="theme-grid" id="board-grid"></div>
+  </div>
+
+  <div class="card">
+    <h2><span data-icon="sliders-horizontal"></span> <span data-i18n="settings.board">Board</span></h2>
+    <div class="field">
+      <label><span data-icon="move"></span><span data-i18n="settings.board_size">Board size</span></label>
+      <select id="board-size">
+        <option value="small" data-i18n="settings.font_small">Small</option>
+        <option value="normal" data-i18n="settings.font_normal">Normal</option>
+        <option value="large" data-i18n="settings.font_large">Large</option>
+      </select>
+    </div>
+    <div id="board-toggles"></div>
+  </div>
+
+  <div class="card">
+    <h2><span data-icon="volume-2"></span> <span data-i18n="settings.sounds">Sounds</span></h2>
+    <div id="sound-toggles"></div>
+    <div class="field" style="margin-top:12px">
+      <label><span data-icon="volume-2"></span><span data-i18n="settings.volume">Sound volume</span></label>
+      <input type="range" id="volume" min="0" max="100" step="5" style="width:100%;padding:0">
+    </div>
+  </div>
+</section>
+
+<!-- ================================ LANGUAGE ============================== -->
+<section class="settings-section" data-section="language">
+  <div class="card">
+    <h2><span data-icon="globe"></span> <span data-i18n="settings.language">Language</span></h2>
+    <p style="color:var(--text-muted);font-size:.86rem" data-i18n="settings.language_desc">
+      Auto-detect uses your browser language
+    </p>
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:320px">
+      <label class="check-row"><input type="radio" name="lang-choice" value="auto">
+        <span data-icon="sparkles"></span><span data-i18n="settings.auto">Auto-detect</span></label>
+      <label class="check-row"><input type="radio" name="lang-choice" value="ru">
+        <span data-icon="globe"></span>Русский</label>
+      <label class="check-row"><input type="radio" name="lang-choice" value="en">
+        <span data-icon="globe"></span>English</label>
+    </div>
+  </div>
+</section>
+
+<!-- =================================== AI ================================ -->
+<section class="settings-section" data-section="ai">
+  <div class="card">
+    <h2><span data-icon="cpu"></span> <span data-i18n="settings.ai">AI opponent</span></h2>
+    <p style="color:var(--text-muted);font-size:.86rem" data-i18n="settings.ai_desc">
+      Used in the “Play vs AI” mode
+    </p>
+    <form id="ai-form">
+      <div class="field">
+        <label><span data-icon="server"></span><span data-i18n="settings.ai_provider">Provider</span></label>
+        <select id="ai-provider">
+          <option value="manual" data-i18n="ai.manual_title">Manual / paste reply</option>
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="gemini">Google Gemini</option>
+          <option value="lmstudio">LM Studio (local)</option>
+          <option value="compat">OpenAI-compatible (custom URL)</option>
+        </select>
+      </div>
+      <div class="field" data-field="base_url">
+        <label><span data-icon="link"></span><span data-i18n="settings.ai_base_url">Base URL</span></label>
+        <input type="text" id="ai-base-url" placeholder="https://openrouter.ai/api/v1">
+        <div class="input-hint" data-i18n="settings.ai_base_url_hint"></div>
+      </div>
+      <div class="field" data-field="lm_host">
+        <label><span data-icon="server"></span><span data-i18n="settings.ai_lmhost">LM Studio host (IP or hostname)</span></label>
+        <input type="text" id="ai-lm-host" placeholder="192.168.1.50">
+        <div class="input-hint" data-i18n="settings.ai_lmhost_hint"></div>
+      </div>
+      <div class="field" data-field="lm_port">
+        <label><span data-icon="zap"></span><span data-i18n="settings.ai_lmport">LM Studio port</span></label>
+        <input type="number" id="ai-lm-port" value="1234" min="1" max="65535">
+      </div>
+      <div class="field" data-field="model">
+        <label><span data-icon="bot"></span><span data-i18n="settings.ai_model">Model name</span></label>
+        <input type="text" id="ai-model" placeholder="gpt-4o-mini">
+        <div class="input-hint" data-i18n="settings.ai_model_hint"></div>
+      </div>
+      <div class="field" data-field="api_key">
+        <label><span data-icon="key-round"></span><span data-i18n="settings.ai_key">API key</span></label>
+        <input type="password" id="ai-key" placeholder="sk-…" autocomplete="off">
+        <div class="input-hint" id="key-hint" data-i18n="settings.ai_key_hint"></div>
+      </div>
+      <div class="field">
+        <label><span data-icon="user"></span><span data-i18n="settings.ai_persona">Persona</span></label>
+        <select id="ai-persona">
+          <option value="coach" data-i18n="settings.persona.coach">Friendly coach</option>
+          <option value="gm" data-i18n="settings.persona.gm">The grandmaster</option>
+          <option value="trash" data-i18n="settings.persona.trash">The trash talker</option>
+          <option value="custom" data-i18n="settings.persona.custom">Custom…</option>
+        </select>
+      </div>
+      <div class="field hidden" id="persona-custom-wrap">
+        <label><span data-icon="book-open"></span><span data-i18n="settings.persona_custom">Describe your own persona</span></label>
+        <textarea id="ai-persona-custom" style="min-height:70px;font-family:'Inter',sans-serif;font-size:.9rem"></textarea>
+      </div>
+      <div class="check-row" style="margin-bottom:12px">
+        <input type="checkbox" id="ai-chat-enabled" checked>
+        <span><strong data-i18n="settings.ai_chat">AI chat enabled</strong>
+          — <span style="color:var(--text-muted);font-size:.85rem" data-i18n="settings.ai_chat_desc"></span></span>
+      </div>
+      <div class="field">
+        <label><span data-icon="thermometer"></span><span data-i18n="settings.ai_temperature">Temperature</span></label>
+        <input type="number" id="ai-temperature" value="0.7" min="0" max="2" step="0.1" style="max-width:140px">
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" type="submit"><span data-icon="check"></span><span data-i18n="common.save">Save</span></button>
+        <button class="btn" type="button" id="btn-ai-test"><span data-icon="wifi"></span><span data-i18n="settings.test">Test connection</span></button>
+      </div>
+      <div class="input-hint mono" id="ai-test-result" style="margin-top:10px"></div>
+    </form>
+  </div>
+</section>
+
+<!-- =============================== SECURITY ============================== -->
+<section class="settings-section" data-section="security">
+  <div class="card">
+    <h2><span data-icon="key-round"></span> <span data-i18n="settings.change_password">Change password</span></h2>
+    <form id="password-form" style="max-width:360px">
+      <div class="field">
+        <label><span data-icon="key-round"></span><span data-i18n="settings.current_password">Current password</span></label>
+        <input type="password" id="pw-current" autocomplete="current-password">
+      </div>
+      <div class="field">
+        <label><span data-icon="shield"></span><span data-i18n="settings.new_password">New password</span></label>
+        <input type="password" id="pw-new" minlength="6" autocomplete="new-password">
+      </div>
+      <button class="btn btn-primary" type="submit"><span data-icon="check"></span><span data-i18n="common.save">Save</span></button>
+    </form>
+  </div>
+
+  <div class="card danger-zone">
+    <h2><span data-icon="triangle-alert"></span> <span data-i18n="settings.delete_account">Delete account</span></h2>
+    <p style="color:var(--text-muted);font-size:.86rem" data-i18n="settings.delete_account_desc">
+      Permanently deletes your profile.
+    </p>
+    <button class="btn btn-danger" id="btn-delete-account"><span data-icon="trash-2"></span><span data-i18n="settings.delete_account">Delete account</span></button>
+  </div>
+</section>
+
+<!-- ================================ SYSTEM =============================== -->
+<section class="settings-section" data-section="system">
+  <div class="card">
+    <h2><span data-icon="gauge"></span> <span data-i18n="settings.engine">Analysis engine</span></h2>
+    <p style="color:var(--text-muted);font-size:.86rem" data-i18n="settings.engine_desc">
+      Used for game review. Install stockfish or gnuchess.
+    </p>
+    <div class="badge" id="engine-status"><span data-icon="timer"></span> …</div>
+  </div>
+  <div class="card">
+    <h2><span data-icon="download"></span> <span data-i18n="settings.export_data">Export my data</span></h2>
+    <p style="color:var(--text-muted);font-size:.86rem" data-i18n="settings.export_desc">
+      Account, settings, games and chat history
+    </p>
+    <a class="btn" href="/api/export" download><span data-icon="download"></span><span data-i18n="settings.export_data">Export (JSON)</span></a>
+  </div>
+  <div class="card">
+    <h2><span data-icon="info"></span> <span data-i18n="settings.about">About</span></h2>
+    <p style="color:var(--text-muted);font-size:.86rem" data-i18n="settings.about_text"></p>
+    <div class="mono" style="font-size:.8rem;color:var(--text-muted)">botyarachess v1.1 · Flask + python-chess · port 15989</div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/js/pages/settings.js"></script>
+{% endblock %}

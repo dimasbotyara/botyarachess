@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}botyarachess — history{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/board.css">{% endblock %}
+{% block content %}
+<div class="page-head">
+  <span data-icon="history"></span>
+  <h1 data-i18n="history.title">Game history</h1>
+</div>
+
+{% if games %}
+<div class="card" style="padding:6px 0">
+  <table class="table">
+    <thead>
+      <tr>
+        <th data-i18n="history.date">Date</th>
+        <th data-i18n="history.mode">Mode</th>
+        <th data-i18n="history.players">Players</th>
+        <th data-i18n="history.result">Result</th>
+        <th data-i18n="history.moves">Moves</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for game in games %}
+      <tr>
+        <td>{{ game.finished_at.strftime('%d.%m %H:%M') if game.finished_at }}</td>
+        <td>
+          <span class="badge">{{ game.mode }}</span>
+          {% if game.rated %}<span class="badge badge-accent" data-i18n="history.rated">Rated</span>{% endif %}
+        </td>
+        <td>{{ game.white.username if game.white else 'AI' }} vs {{ game.black.username if game.black else 'AI' }}</td>
+        <td>
+          {% if game.winner_color() == (game.color_of(current_user.id) or '') %}
+          <span class="badge badge-success" data-i18n="game.victory">Victory!</span>
+          {% elif game.result == '1/2-1/2' %}
+          <span class="badge badge-warning" data-i18n="game.drawn">Draw</span>
+          {% else %}
+          <span class="badge badge-danger" data-i18n="game.defeat">Defeat</span>
+          {% endif %}
+          <span class="input-hint">{{ game.termination }}</span>
+        </td>
+        <td>{{ game.moves_san|length }}</td>
+        <td style="text-align:right; white-space:nowrap">
+          <a class="btn" href="/game/{{ game.id }}"><span data-icon="play"></span></a>
+          <a class="btn" href="/review/{{ game.id }}"><span data-icon="gauge"></span><span data-i18n="history.review">Review</span></a>
+          <a class="btn" href="/api/games/{{ game.id }}/pgn" download><span data-icon="download"></span>PGN</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card empty-state">
+  <span data-icon="history"></span>
+  <div data-i18n="history.empty">No finished games yet.</div>
+</div>
+{% endif %}
+{% endblock %}

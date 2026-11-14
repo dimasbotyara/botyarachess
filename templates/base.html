@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="classic-dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}botyarachess{% endblock %}</title>
+  <link rel="icon" href="/static/img/pieces/bN.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/css/fonts.css">
+  <link rel="stylesheet" href="/static/css/themes.css">
+  <link rel="stylesheet" href="/static/css/base.css">
+  {% block extra_css %}{% endblock %}
+  <link rel="stylesheet" href="/static/css/responsive.css">
+  <script>
+    // apply the saved theme before first paint to avoid a flash of wrong theme
+    (function () {
+      try {
+        var theme = localStorage.getItem('botyarachess.theme')
+          || '{{ current_theme or "classic-dark" }}';
+        document.documentElement.dataset.theme = theme;
+      } catch (e) { /* storage disabled */ }
+    })();
+    // surface module errors in the tab title (debug aid)
+    window.addEventListener('error', function (e) {
+      if (e.filename && e.filename.includes('/static/')) {
+        document.title = 'JSERR: ' + e.message + ' @ ' +
+          e.filename.split('/').pop() + ':' + e.lineno;
+      }
+    });
+    window.addEventListener('unhandledrejection', function (e) {
+      document.title = 'REJ: ' + ((e.reason && e.reason.message) || e.reason);
+    });
+  </script>
+</head>
+<body data-locale="{{ current_locale }}"
+      data-auth="{{ '1' if current_username else '0' }}"
+      data-username="{{ current_username or '' }}"
+      data-user-id="{{ current_user.id if current_user.is_authenticated else '' }}"
+      data-settings='{{ current_user.settings | tojson if current_user.is_authenticated else "{}" }}'>
+
+<header class="site-header">
+  <a class="logo" href="/">
+    <span data-icon="crown"></span>
+    <span>botyarachess</span>
+  </a>
+
+  {% if current_user.is_authenticated %}
+  <nav class="nav" id="main-nav">
+    <a href="/" {% if request.path == '/' %}class="active"{% endif %}>
+      <span data-icon="layout-dashboard"></span><span data-i18n="nav.dashboard">Dashboard</span>
+    </a>
+    <a href="/play/ai" {% if request.path == '/play/ai' %}class="active"{% endif %}>
+      <span data-icon="cpu"></span><span data-i18n="nav.ai">Play vs AI</span>
+    </a>
+    <a href="/play/online" {% if request.path == '/play/online' %}class="active"{% endif %}>
+      <span data-icon="users"></span><span data-i18n="nav.online">Online</span>
+    </a>
+    <a href="/games" {% if request.path == '/games' %}class="active"{% endif %}>
+      <span data-icon="history"></span><span data-i18n="nav.history">History</span>
+    </a>
+    <a href="/settings" {% if request.path == '/settings' %}class="active"{% endif %}>
+      <span data-icon="settings"></span><span data-i18n="nav.settings">Settings</span>
+    </a>
+  </nav>
+  {% endif %}
+
+  <div class="header-spacer"></div>
+  <div class="header-actions">
+    {% if current_user.is_authenticated %}
+    <button id="hamburger" class="icon-btn" aria-label="Menu">
+      <span data-icon="menu"></span>
+    </button>
+
+    <button class="icon-btn" id="quick-settings-btn" aria-label="Quick settings"
+            data-i18n-title="quick.title">
+      <span data-icon="sliders-horizontal"></span>
+    </button>
+
+    <div class="menu-wrap">
+      <button class="user-chip" data-menu>
+        <span class="avatar">{{ current_user.username[0] }}</span>
+        <span class="username">{{ current_user.username }}</span>
+        <span class="rating">{{ current_user.rating }}</span>
+      </button>
+      <div class="menu">
+        <div class="menu-head">botyarachess</div>
+        <a class="menu-item" href="/profile">
+          <span data-icon="user"></span><span data-i18n="nav.profile">Profile</span>
+        </a>
+        <a class="menu-item" href="/settings">
+          <span data-icon="settings"></span><span data-i18n="nav.settings">Settings</span>
+        </a>
+        <div class="menu-divider"></div>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="menu-item" type="submit">
+            <span data-icon="log-out"></span><span data-i18n="nav.logout">Log out</span>
+          </button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <a class="btn" href="/login"><span data-icon="log-in"></span><span data-i18n="nav.login">Log in</span></a>
+    <a class="btn btn-primary" href="/register"><span data-icon="user-plus"></span><span data-i18n="nav.register">Sign up</span></a>
+    {% endif %}
+  </div>
+</header>
+
+<div class="flashes">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, text in messages %}
+      <span data-key="flash" data-category="{{ category }}" data-text="{{ text }}"></span>
+    {% endfor %}
+  {% endwith %}
+</div>
+
+<div id="toasts"></div>
+
+<main class="page {% block page_class %}{% endblock %}">
+  {% block content %}{% endblock %}
+</main>
+
+<script src="/static/vendor/socket.io.min.js" {% block socket_attr %}defer{% endblock %}></script>
+<script type="module" src="/static/js/main.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

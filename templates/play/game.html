@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}botyarachess — game #{{ game.id }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/board.css">{% endblock %}
+
+{% block content %}
+<div id="game-root"
+     data-mode="{{ game.mode }}"
+     data-state='{{ game_state_json }}'
+     data-my-color="{{ my_color or '' }}"
+     data-is-player="{{ '1' if is_player else '0' }}"
+     data-ai-provider="{{ game.ai_provider or 'manual' }}"
+     data-username="{{ current_username or '' }}"
+     data-user-id="{{ current_user.id if current_user.is_authenticated else '0' }}"
+     class="game-layout">
+
+  <div class="game-main">
+    {% if game.mode == 'ai' %}
+    <div class="ai-chat" id="ai-chat">
+      <div class="ai-bubble" id="ai-bubble">
+        <div class="ai-avatar"><span data-icon="cpu"></span></div>
+        <div class="ai-bubble-body">
+          <div class="ai-bubble-name" data-i18n="game.ai_name">AI opponent</div>
+          <div class="ai-bubble-text" id="ai-bubble-text"></div>
+        </div>
+      </div>
+      <div class="chat-log" id="chat-log"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" maxlength="500"
+               data-i18n-ph="game.chat_placeholder" placeholder="Say something to the AI…">
+        <button class="btn" id="chat-send"><span data-icon="send"></span><span data-i18n="game.send">Send</span></button>
+      </div>
+    </div>
+
+    <div class="ai-chat manual-box hidden" id="manual-box">
+      <div class="ai-bubble">
+        <div class="ai-avatar"><span data-icon="copy"></span></div>
+        <div class="ai-bubble-body">
+          <div class="ai-bubble-name" data-i18n="ai.manual_title">Manual AI mode</div>
+          <div class="ai-bubble-text" data-i18n="ai.manual_step1">1. Copy the prompt below…</div>
+        </div>
+      </div>
+      <textarea id="manual-prompt" readonly></textarea>
+      <div class="btn-row">
+        <button class="btn" id="manual-copy"><span data-icon="copy"></span><span data-i18n="ai.manual_copy_prompt">Copy prompt</span></button>
+      </div>
+      <div class="ai-bubble-text" data-i18n="ai.manual_step2">2. Paste the model's reply here:</div>
+      <textarea id="manual-reply" placeholder='MOVE: e2e4&#10;CHAT: ...'></textarea>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="manual-submit"><span data-icon="send"></span><span data-i18n="ai.manual_submit">Submit reply</span></button>
+      </div>
+      <div class="input-hint" data-i18n="ai.manual_hint">The reply must contain MOVE / CHAT lines.</div>
+    </div>
+    {% endif %}
+
+    {% if game.mode == 'online' %}
+    <div class="chat-log card" id="chat-log" style="max-height:140px;margin-bottom:10px"></div>
+    <div class="chat-input-row" style="margin-bottom:10px">
+      <input type="text" id="chat-input" maxlength="500"
+             data-i18n-ph="game.chat_placeholder_p" placeholder="Message your opponent…">
+      <button class="btn" id="chat-send"><span data-icon="send"></span><span data-i18n="game.send">Send</span></button>
+    </div>
+    {% endif %}
+
+    <div class="player-bar" id="player-top">
+      <span class="avatar">?</span>
+      <div>
+        <div class="p-name">—</div>
+        <div class="p-sub"></div>
+      </div>
+      <div class="spacer"></div>
+      <div class="captured"></div>
+    </div>
+
+    <div class="board-wrap" id="board"></div>
+
+    <div class="player-bar" id="player-bottom">
+      <span class="avatar">?</span>
+      <div>
+        <div class="p-name">—</div>
+        <div class="p-sub"></div>
+      </div>
+      <div class="spacer"></div>
+      <div class="captured"></div>
+    </div>
+
+    <div class="status-line" id="status-line"></div>
+    <div class="thinking-banner" id="thinking-banner">
+      <span class="dots"><span></span><span></span><span></span></span>
+      <span data-i18n="game.thinking">AI is thinking…</span>
+    </div>
+  </div>
+
+  <div class="game-side">
+    <div class="card controls" id="controls">
+      <button class="btn" id="btn-flip"><span data-icon="refresh-cw"></span><span data-i18n="game.flip">Flip</span></button>
+      <button class="btn" id="btn-autoflip"><span data-icon="rotate-ccw"></span><span data-i18n="game.autoflip">Auto-flip</span></button>
+      <button class="btn" id="btn-undo"><span data-icon="undo-2"></span><span data-i18n="game.undo">Undo</span></button>
+      <button class="btn" id="btn-draw"><span data-icon="handshake"></span><span data-i18n="game.draw_offer">Draw</span></button>
+      <button class="btn" id="btn-resign"><span data-icon="flag"></span><span data-i18n="game.resign">Resign</span></button>
+      <button class="btn" id="btn-rematch"><span data-icon="refresh-cw"></span><span data-i18n="game.rematch">Rematch</span></button>
+      <button class="btn hidden" id="btn-pgn"><span data-icon="download"></span><span data-i18n="game.pgn">PGN</span></button>
+      <button class="btn" id="btn-sound"><span data-icon="volume-2"></span></button>
+    </div>
+
+    <div class="card moves-panel">
+      <h3><span data-icon="list"></span> <span data-i18n="game.move_history">Moves</span></h3>
+      <div class="moves-list" id="moves-list"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/js/game/{{ 'online' if game.mode == 'online' else (game.mode + '.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}botyarachess — dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <span data-icon="layout-dashboard"></span>
+  <h1 id="hello-title"></h1>
+</div>
+<p style="color:var(--text-muted)" data-i18n="home.subtitle">Choose a way to play</p>
+
+<div class="grid-cards" style="margin-bottom:26px">
+  <a class="mode-card" href="/play/hotseat">
+    <span data-icon="monitor-play"></span>
+    <strong data-i18n="home.hotseat">Hotseat</strong>
+    <span data-i18n="home.hotseat_desc">Two players on one screen</span>
+  </a>
+  <a class="mode-card" href="/play/ai">
+    <span data-icon="cpu"></span>
+    <strong data-i18n="home.ai">Play vs AI</strong>
+    <span data-i18n="home.ai_desc">LLM opponent that talks to you</span>
+  </a>
+  <a class="mode-card" href="/play/online">
+    <span data-icon="users"></span>
+    <strong data-i18n="home.online">Online game</strong>
+    <span data-i18n="home.online_desc">Lobby, quick match, clocks and Elo</span>
+  </a>
+  <a class="mode-card" href="/games">
+    <span data-icon="history"></span>
+    <strong data-i18n="home.history">Game history</strong>
+    <span data-i18n="home.history_desc">Replay games and engine review</span>
+  </a>
+</div>
+
+<h2 data-i18n="home.recent">Recent games</h2>
+{% if recent %}
+<div class="card" style="padding:6px 0">
+  <table class="table">
+    <thead>
+      <tr>
+        <th data-i18n="history.players">Players</th>
+        <th data-i18n="history.mode">Mode</th>
+        <th data-i18n="history.result">Result</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for game in recent %}
+      <tr>
+        <td>{{ game.white.username if game.white else 'AI' }} · {{ game.black.username if game.black else 'AI' }}</td>
+        <td><span class="badge">{{ game.mode }}</span></td>
+        <td>
+          {% if game.result == '*' %}
+          <span class="badge badge-accent">{{ game.moves_san|length // 2 }} moves</span>
+          {% else %}
+          <span class="badge badge-success">{{ game.result }}</span>
+          {% endif %}
+        </td>
+        <td style="text-align:right">
+          <a class="btn" href="/game/{{ game.id }}"><span data-icon="play"></span><span data-i18n="home.continue">Continue</span></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card empty-state">
+  <span data-icon="swords"></span>
+  <div data-i18n="home.no_recent">No games yet — go play some!</div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script type="module">
+  import { t } from '/static/js/core/i18n.js';
+  import { applyI18n } from '/static/js/core/i18n.js';
+  const username = document.body.dataset.username;
+  document.getElementById('hello-title').textContent = t('home.hello', { name: username });
+  applyI18n(document);
+  window.addEventListener('langchange', () => {
+    document.getElementById('hello-title').textContent = t('home.hello', { name: username });
+    applyI18n(document);
+  });
+</script>
+{% endblock %}

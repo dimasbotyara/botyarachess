@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}botyarachess — review{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/board.css">{% endblock %}
+{% block content %}
+<div id="review-root"
+     data-game='{{ review_data_json }}'
+     data-engine="{{ '1' if engine.available else '0' }}"
+     data-my-color="{{ game.color_of(current_user.id) or '' }}"
+     class="review-layout">
+  <div class="game-main">
+    <div class="player-bar" id="player-top">
+      <span class="avatar">{{ (game.black.username if game.black else 'AI')[0] }}</span>
+      <div>
+        <div class="p-name">{{ game.black.username if game.black else 'AI' }}</div>
+        <div class="p-sub">{{ 'Black' }}</div>
+      </div>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="board-wrap" id="board"></div>
+
+    <div class="player-bar" id="player-bottom">
+      <span class="avatar">{{ (game.white.username if game.white else 'AI')[0] }}</span>
+      <div>
+        <div class="p-name">{{ game.white.username if game.white else 'AI' }}</div>
+        <div class="p-sub">{{ 'White' }}</div>
+      </div>
+      <div class="spacer"></div>
+    </div>
+
+    <canvas class="eval-graph" id="eval-graph"></canvas>
+    <div class="status-line" id="eval-info"></div>
+
+    <div class="review-nav">
+      <button class="btn" id="btn-start"><span data-icon="chevrons-left"></span></button>
+      <button class="btn" id="btn-prev"><span data-icon="chevron-left"></span></button>
+      <button class="btn" id="btn-next"><span data-icon="chevron-right"></span></button>
+      <button class="btn" id="btn-end"><span data-icon="chevrons-right"></span></button>
+    </div>
+  </div>
+
+  <div class="game-side">
+    <div class="card">
+      <h2><span data-icon="gauge"></span> <span data-i18n="review.title">Game review</span></h2>
+      <div class="badge engine-badge" id="engine-name">
+        <span data-icon="cpu"></span> {{ game.mode }}
+      </div>
+
+      <div id="review-unavailable" class="hidden" style="margin-top:12px">
+        <span class="badge badge-warning"><span data-icon="triangle-alert"></span> <span data-i18n="review.unavailable">Engine review unavailable</span></span>
+      </div>
+
+      <div id="review-loading" style="margin-top:12px">
+        {% if not game.analysis_json %}
+        <div class="field">
+          <label><span data-icon="gauge"></span><span data-i18n="review.speed">Analysis depth</span></label>
+          <select id="review-speed">
+            <option value="fast" data-i18n="review.speed_fast">Fast</option>
+            <option value="normal" selected data-i18n="review.speed_normal">Normal</option>
+            <option value="deep" data-i18n="review.speed_deep">Deep</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-block" id="btn-review-start">
+          <span data-icon="play"></span><span data-i18n="review.start">Run engine review</span>
+        </button>
+        <div class="input-hint mono" id="review-progress" style="margin-top:8px"></div>
+        {% endif %}
+      </div>
+
+      <div id="review-content" class="hidden" style="margin-top:14px">
+        <div class="accuracy-row">
+          <div class="acc">
+            <div class="acc-label" id="white-name">White</div>
+            <div class="accuracy-bar"><div id="acc-white-bar"></div></div>
+            <div class="mono" style="font-size:.8rem" id="acc-white-value"></div>
+          </div>
+          <div class="acc">
+            <div class="acc-label" id="black-name">Black</div>
+            <div class="accuracy-bar"><div id="acc-black-bar"></div></div>
+            <div class="mono" style="font-size:.8rem" id="acc-black-value"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card moves-panel">
+      <h3><span data-icon="list"></span> <span data-i18n="game.move_history">Moves</span></h3>
+      <div class="review-moves" id="review-moves">
+        <ol id="review-moves-list"></ol>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/js/pages/review.js"></script>
+{% endblock %}
